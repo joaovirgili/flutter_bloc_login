@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "1012112485918",
+    "firebase_url": "https://fir-login-bloc.firebaseio.com",
+    "project_id": "fir-login-bloc",
+    "storage_bucket": "fir-login-bloc.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1012112485918:android:ae3c1717acb1547d",
+        "android_client_info": {
+          "package_name": "com.example.bloclogin"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1012112485918-p6po2aem8stn35klaff55m25917tf649.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.bloclogin",
+            "certificate_hash": "7a77be333c7541fb2401f5dea4269790dd3d8451"
+          }
+        },
+        {
+          "client_id": "1012112485918-n69lnv2cgrotbh52tik1mfsm5piotfc6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDZJEoBSKbMW7L8trbb-RNU6PGYChr51xE"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1012112485918-n69lnv2cgrotbh52tik1mfsm5piotfc6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
