@@ -1,11 +1,12 @@
-import 'dart:async';
+import '../../controller/auth.dart';
+import '../../model/user.dart';
+import '../../constants.dart';
 
-import 'package:bloc_login/controller/auth.dart';
-import 'package:bloc_login/model/user.dart';
 import 'package:bloc_pattern/bloc_pattern.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
-import '../../constants.dart';
+
+import 'dart:async';
 
 class HomeBloc implements BlocBase {
   final BuildContext context;

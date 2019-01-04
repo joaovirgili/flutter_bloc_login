@@ -1,8 +1,9 @@
-import 'dart:async';
+import '../model/user.dart';
 
-import 'package:bloc_login/model/user.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+
+import 'dart:async';
 
 class Authenticator {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
@@ -22,13 +23,16 @@ class Authenticator {
     await _googleSignInAccount.signOut();
   }
 
-  Future<User> signInWithGoogle() async {
-    GoogleSignInAccount googleAuthentication =
-        await _googleSignInAccount.signIn();
-    final authenticated = await googleAuthentication.authentication;
-    FirebaseUser user = await _firebaseAuth.signInWithGoogle(
-        idToken: authenticated.idToken, accessToken: authenticated.accessToken);
-    return new User(user);
+  Future<bool> signInWithGoogle() async {
+    try {
+      GoogleSignInAccount googleAuthentication =
+          await _googleSignInAccount.signIn();
+      await googleAuthentication.authentication;
+      return true;
+    } catch (error) {
+      print('Erro login Google: $error');
+      return false;
+    }
   }
 
   // User sign in returning uid

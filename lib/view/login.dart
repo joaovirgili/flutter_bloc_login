@@ -1,9 +1,10 @@
-import 'package:bloc_login/controller/bloc/login-bloc.dart';
+import '../constants.dart';
+import '../controller/bloc/login-bloc.dart';
+
 import 'package:flutter/material.dart';
 import 'package:bloc_pattern/bloc_pattern.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter/services.dart';
-import '../constants.dart';
 
 class LoginPage extends StatefulWidget {
   @override

@@ -1,10 +1,11 @@
-import 'package:bloc_login/controller/bloc/home-bloc.dart';
-import 'package:bloc_login/controller/bloc/login-bloc.dart';
-import 'package:bloc_login/view/home.dart';
-import 'package:bloc_login/view/login.dart';
+import './controller/bloc/home-bloc.dart';
+import './controller/bloc/login-bloc.dart';
+import './view/home.dart';
+import './view/login.dart';
+import 'constants.dart';
+
 import 'package:flutter/material.dart';
 import 'package:bloc_pattern/bloc_pattern.dart';
-import 'constants.dart';
 
 void main() => runApp(MyApp());
 

@@ -1,10 +1,12 @@
-import 'package:bloc_login/controller/auth.dart';
-import 'package:bloc_login/model/user.dart';
+import '../../controller/auth.dart';
+import '../../model/user.dart';
+import '../../constants.dart';
+
 import 'package:bloc_pattern/bloc_pattern.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
+
 import 'dart:async';
-import '../../constants.dart';
 
 class LoginBloc implements BlocBase {
   final BuildContext context;
@@ -58,9 +60,9 @@ class LoginBloc implements BlocBase {
 
   loginGoogle() async {
     _loadingController.add(true);
-    await auth.signInWithGoogle();
+    bool ok = await auth.signInWithGoogle();
     _loadingController.add(false);
-    navigateToHome();
+    if (ok) navigateToHome();
   }
 
   loginFacebook() async {

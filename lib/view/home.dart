@@ -1,4 +1,5 @@
-import 'package:bloc_login/controller/bloc/home-bloc.dart';
+import '../controller/bloc/home-bloc.dart';
+
 import 'package:bloc_pattern/bloc_pattern.dart';
 import 'package:flutter/material.dart';
 
