@@ -1,6 +1,9 @@
 # bloc_login
 
-A new Flutter project.
+Flutter login implementation with bloc:
+- Firebase Authentication
+- Google Sign in
+- Facebook Sign in
 
 ## Getting Started
 
