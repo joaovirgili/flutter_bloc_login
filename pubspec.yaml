@@ -24,6 +24,8 @@ dependencies:
   font_awesome_flutter: ^8.2.0
   firebase_auth: ^0.6.6
   google_sign_in: ^3.2.4
+  flutter_facebook_login: ^1.1.1
+  http: ^0.12.0
 
 dev_dependencies:
   flutter_test:

@@ -32,7 +32,7 @@ class HomeBloc implements BlocBase {
 
   navigateToLogin() {
     Navigator.of(this.context)
-        .pushNamedAndRemoveUntil(PATH_LOGIN, (Route<dynamic> route) => true);
+        .pushNamedAndRemoveUntil(PATH_LOGIN, (Route<dynamic> route) => false);
   }
 
   getCurrentUser() async {

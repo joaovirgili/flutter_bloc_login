@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class User {
   String _displayName;
@@ -13,6 +14,20 @@ class User {
       this._phoneNumber = user.phoneNumber;
       this._uid = user.uid;
     }
+  }
+
+  User.fromFacebook(profile) {
+    this._email = profile['email'];
+    this._displayName = "${profile['name']}";
+    this._phoneNumber = "";
+    this._uid = profile['id'];
+  }
+
+  User.fromGoogle(GoogleSignInAccount googleUser) {
+    this._email = googleUser.email;
+    this._displayName = googleUser.displayName;
+    this._phoneNumber = "";
+    this._uid = googleUser.id;
   }
 
   get displayName => this._displayName;

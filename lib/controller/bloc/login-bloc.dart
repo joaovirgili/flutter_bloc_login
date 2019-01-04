@@ -1,5 +1,4 @@
 import '../../controller/auth.dart';
-import '../../model/user.dart';
 import '../../constants.dart';
 
 import 'package:bloc_pattern/bloc_pattern.dart';
@@ -44,14 +43,12 @@ class LoginBloc implements BlocBase {
   }
 
   loginEmail() async {
-    // Inicia o loading
     _loadingController.add(true);
-
-    final email = _emailController.value;
-    final password = _passwordController.value;
-    User user = await auth.signIn(email, password);
+    bool loggedIn = await auth.signInWithEmail(
+        _emailController.value, _passwordController.value);
     _loadingController.add(false);
-    if (user == null) {
+
+    if (!loggedIn) {
       inError.add(ERROR_VALIDATION);
     } else {
       navigateToHome();
@@ -66,7 +63,10 @@ class LoginBloc implements BlocBase {
   }
 
   loginFacebook() async {
-    // await this.auth.signInWithFacebook();
+    _loadingController.add(true);
+    bool loggedIn = await this.auth.signInWithFacebook();
+    _loadingController.add(false);
+    if (loggedIn) navigateToHome();
   }
 
   signout() async {

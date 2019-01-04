@@ -1,49 +1,91 @@
+import 'dart:convert';
+
 import '../model/user.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 
+import 'package:http/http.dart' as http;
 import 'dart:async';
 
 class Authenticator {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignInAccount = GoogleSignIn();
+  final FacebookLogin _facebookSignIn = new FacebookLogin();
 
   Authenticator() {
     _firebaseAuth.setLanguageCode('pt-PT');
   }
 
   Future<User> getCurrentUser() async {
-    FirebaseUser user = await this._firebaseAuth.currentUser();
-    return user != null ? new User(user) : null;
+    // Check firebase user
+    FirebaseUser firebaseUser = await this._firebaseAuth.currentUser();
+    if (firebaseUser != null) {
+      return new User(firebaseUser);
+    }
+
+    // TODO: Check google user
+    bool loggedIn = await this._googleSignInAccount.isSignedIn();
+    if (loggedIn) {
+      GoogleSignInAccount googleUser = _googleSignInAccount.currentUser;
+      //   print(googleUser.displayName);
+      //   if (googleUser != null) {
+      //     return new User.fromGoogle(googleUser);
+      //   }
+    }
+
+    // Check facebook user
+    FacebookAccessToken token = await this._facebookSignIn.currentAccessToken;
+    if (token != null) {
+      var graphResponse = await http.get(
+          'https://graph.facebook.com/v2.12/me?fields=name,first_name,last_name,email&access_token=${token.token}');
+      if (graphResponse.statusCode == 200) {
+        var body = json.decode(graphResponse.body);
+        return new User.fromFacebook(body);
+      }
+    }
+    return null;
   }
 
   signout() async {
-    await _firebaseAuth.signOut();
-    await _googleSignInAccount.signOut();
+    await this._firebaseAuth.signOut();
+    await this._googleSignInAccount.signOut();
+    await this._facebookSignIn.logOut();
   }
 
-  Future<bool> signInWithGoogle() async {
+  Future<bool> signInWithEmail(String email, String password) async {
     try {
-      GoogleSignInAccount googleAuthentication =
-          await _googleSignInAccount.signIn();
-      await googleAuthentication.authentication;
+      await _firebaseAuth.signInWithEmailAndPassword(
+          email: email, password: password);
       return true;
-    } catch (error) {
-      print('Erro login Google: $error');
+    } catch (e) {
       return false;
     }
   }
 
-  // User sign in returning uid
-  Future<User> signIn(String email, String password) async {
-    FirebaseUser user;
+  Future<bool> signInWithFacebook() async {
+    final FacebookLoginResult result =
+        await this._facebookSignIn.logInWithReadPermissions(['email']);
+
+    if (result.status == FacebookLoginStatus.loggedIn)
+      return true;
+    else if (result.status == FacebookLoginStatus.cancelledByUser) {
+      print("Login facebook: cancelado");
+      return false;
+    } else {
+      print("Login facebook ERRO: ${result.errorMessage}");
+      return false;
+    }
+  }
+
+  Future<bool> signInWithGoogle() async {
     try {
-      user = await _firebaseAuth.signInWithEmailAndPassword(
-          email: email, password: password);
-      return new User(user);
-    } catch (e) {
-      return null;
+      await _googleSignInAccount.signIn();
+      return true;
+    } catch (error) {
+      print('Erro login Google: $error');
+      return false;
     }
   }
 
