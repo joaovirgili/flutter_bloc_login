@@ -53,10 +53,19 @@ class UsernameTextState extends State<UsernameText> {
   Widget build(BuildContext context) {
     return StreamBuilder(
       stream: widget.homeController.outName,
-      builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
-        return Text('Usuário logado: ${snapshot.data}');
-      },
       initialData: "",
+      builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+        return AnimatedCrossFade(
+          duration: Duration(milliseconds: 300),
+          crossFadeState: snapshot.data == ""
+              ? CrossFadeState.showSecond
+              : CrossFadeState.showFirst,
+          firstChild: Text('${snapshot.data}'),
+          secondChild: Center(
+            child: CircularProgressIndicator(),
+          ),
+        );
+      },
     );
   }
 }
