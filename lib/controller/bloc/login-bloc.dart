@@ -57,9 +57,9 @@ class LoginBloc implements BlocBase {
 
   loginGoogle() async {
     _loadingController.add(true);
-    bool ok = await auth.signInWithGoogle();
+    bool loggedIn = await auth.signInWithGoogle();
     _loadingController.add(false);
-    if (ok) navigateToHome();
+    if (loggedIn) navigateToHome();
   }
 
   loginFacebook() async {

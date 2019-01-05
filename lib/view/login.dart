@@ -151,7 +151,7 @@ class LoginPageState extends State<LoginPage> {
           color: Color(0xFF4267b2),
         ),
         SocialButton(
-          // onPressed: loginController.loginGoogle,
+          onPressed: loginController.loginGoogle,
           logo: Icon(FontAwesomeIcons.google),
           color: Color(0xFFd52d28),
         ),
