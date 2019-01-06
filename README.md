@@ -4,6 +4,8 @@ Flutter login implementation with bloc:
 - Firebase Authentication
 - Google Sign in
 - Facebook Sign in
+- Firebase Realtime Database
+- Shared Preferences to save current user logged in
 
 ## Getting Started
 
