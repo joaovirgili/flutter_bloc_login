@@ -14,11 +14,30 @@ class LoginPage extends StatefulWidget {
 }
 
 class LoginPageState extends State<LoginPage> {
-  final FocusNode _emaiFocus = FocusNode();
+  final FocusNode _emailFocus = FocusNode();
   final FocusNode _passwordFocus = FocusNode();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  final _emailKey = GlobalKey<FormFieldState>();
+  final _passwordKey = GlobalKey<FormFieldState>();
+
+  void initState() {
+    super.initState();
+
+    // Validate e-mail
+    _emailFocus.addListener(() {
+      if (!_emailFocus.hasFocus && !_emailKey.currentState.validate()) {
+        FocusScope.of(context).requestFocus(_emailFocus);
+      }
+    });
+
+    _emailFocus.addListener(() {
+      if (!_emailFocus.hasFocus && !_emailKey.currentState.validate()) {
+        FocusScope.of(context).requestFocus(_emailFocus);
+      }
+    });
+  }
 
   @override
   void dispose() {
@@ -31,43 +50,132 @@ class LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     final LoginBloc loginController = BlocProvider.of<LoginBloc>(context);
     loginController.checkUser();
+    _emailFocus.addListener(() {
+      if (_emailFocus.hasFocus) {
+        loginController.checkAndCleanError();
+      }
+    });
+    _passwordFocus.addListener(() {
+      if (_passwordFocus.hasFocus) {
+        loginController.checkAndCleanError();
+      }
+    });
     return Scaffold(
-      body: Center(
-        child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-          child: Form(
-            key: _formKey,
-            child: SingleChildScrollView(
-              child: Column(
-                children: <Widget>[
-                  buildLogosSection(),
-                  SizedBox(height: 30.0),
-                  buildEmailFormField(context),
-                  SizedBox(height: 20.0),
-                  buildPasswordFormField(loginController),
-                  SizedBox(height: 15.0),
-                  buildButtonsSection(loginController),
-                  SizedBox(height: 20.0),
-                  buildRegisterSection(loginController)
-                ],
+      body: Stack(children: [
+        Container(
+          height: MediaQuery.of(context).size.height,
+          width: MediaQuery.of(context).size.width,
+          color: Theme.of(context).backgroundColor,
+        ),
+        Center(
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            child: Form(
+              key: _formKey,
+              child: SingleChildScrollView(
+                child: Column(
+                  children: <Widget>[
+                    buildLogosSection(),
+                    SizedBox(height: 40.0),
+                    Container(
+                      height: 320,
+                      width: 290,
+                      child: Stack(
+                        children: <Widget>[
+                          Positioned(
+                              top: (75 / 2),
+                              child:
+                                  buildFormContainer(context, loginController)),
+                          Align(
+                              alignment: Alignment.topCenter,
+                              child: buildUserImage()),
+                          Align(
+                            alignment: Alignment.bottomCenter,
+                            child: buildLoginButtons(loginController),
+                          )
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 20.0),
+                    buildRegiserButton(context)
+                  ],
+                ),
               ),
             ),
           ),
+        ),
+      ]),
+    );
+  }
+
+  Container buildUserImage() {
+    return new Container(
+      width: 75.0,
+      height: 75.0,
+      decoration: new BoxDecoration(
+        boxShadow: [
+          new BoxShadow(
+            color: Color(0xFFB5B5B5),
+            blurRadius: 5.0,
+          ),
+        ],
+        color: Colors.black,
+        image: new DecorationImage(
+          image: AssetImage('assets/img/default-user.png'),
+          fit: BoxFit.cover,
+        ),
+        borderRadius: new BorderRadius.all(new Radius.circular(50.0)),
+        border: new Border.all(
+          color: Colors.white,
+          width: 4.0,
         ),
       ),
     );
   }
 
+  Container buildFormContainer(
+      BuildContext context, LoginBloc loginController) {
+    return Container(
+      width: 280,
+      height: (320 - (75 / 2) - 25),
+      margin: EdgeInsets.only(left: 5),
+      decoration: BoxDecoration(
+          boxShadow: [new BoxShadow(color: Color(0xFFB5B5B5), blurRadius: 5.0)],
+          color: Colors.white,
+          borderRadius: BorderRadius.all(Radius.circular(25.0))),
+      padding: EdgeInsets.only(top: 50.0, left: 20.0, right: 20.0),
+      child: Column(
+        children: [
+          buildEmailFormField(context),
+          SizedBox(height: 20.0),
+          buildPasswordFormField(loginController),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: <Widget>[
+              FlatButton(
+                padding: EdgeInsets.zero,
+                child: Text("Esqueceu a senha?"),
+                onPressed: () => {},
+              )
+            ],
+          ),
+          buildErrorStream(loginController)
+        ],
+      ),
+    );
+  }
+
+  FlatButton buildRegiserButton(BuildContext context) {
+    return FlatButton(
+      onPressed: () => {},
+      child: Text("Registre-se",
+          style: TextStyle(color: Theme.of(context).primaryColor)),
+    );
+  }
+
   /// Responsible method for creating logos' section
   Widget buildLogosSection() {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: <Widget>[
-        Image.asset('assets/img/flutter-logo.png', width: 100.0, height: 100.0),
-        Image.asset('assets/img/bloc-pattern.png', width: 100.0, height: 100.0),
-      ],
-    );
+    return Image.asset('assets/img/logo-bird.png', width: 100.0, height: 100.0);
   }
 
   /// Responsible method for e-mail input
@@ -75,13 +183,18 @@ class LoginPageState extends State<LoginPage> {
     return TextFormField(
       keyboardType: TextInputType.emailAddress,
       controller: _emailController,
-      decoration:
-          InputDecoration(border: UnderlineInputBorder(), labelText: "E-mail"),
+      decoration: InputDecoration(
+        border: OutlineInputBorder(),
+        labelText: "E-mail",
+        contentPadding: EdgeInsets.all(15),
+      ),
       textInputAction: TextInputAction.next,
-      focusNode: this._emaiFocus,
+      focusNode: this._emailFocus,
       onFieldSubmitted: (content) {
-        FocusScope.of(context).requestFocus(this._passwordFocus);
+        if (_emailKey.currentState.validate())
+          FocusScope.of(context).requestFocus(this._passwordFocus);
       },
+      key: _emailKey,
       validator: (content) {
         if (content.isEmpty || !content.contains('@')) return ERROR_EMAIL;
       },
@@ -90,91 +203,44 @@ class LoginPageState extends State<LoginPage> {
 
   /// Responsible method for password input
   Widget buildPasswordFormField(LoginBloc loginController) {
-    return TextFormField(
-      controller: _passwordController,
-      decoration: InputDecoration(
-          border: UnderlineInputBorder(), labelText: "Password"),
-      obscureText: true,
-      textInputAction: TextInputAction.go,
-      focusNode: this._passwordFocus,
-      onFieldSubmitted: (content) {
-        validateAndSignIn(loginController);
-      },
-      validator: (content) {
-        if (content.isEmpty)
-          return ERROR_EMPTY_PASSWORD;
-        else if (content.length < 6) return ERROR_MIN_PASSWORD;
-      },
-    );
-  }
-
-  /// Responsible method for creating animation when pressing the buttons
-  Widget buildButtonsSection(LoginBloc loginController) {
-    return StreamBuilder(
-      stream: loginController.outLoading,
-      initialData: false,
-      builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
-        return AnimatedCrossFade(
-          crossFadeState: snapshot.data
-              ? CrossFadeState.showSecond
-              : CrossFadeState.showFirst,
-          firstChild: buildButtons(context, loginController),
-          secondChild: buildLoading(),
-          duration: Duration(milliseconds: 300),
-        );
-      },
-    );
-  }
-
-  /// Responsible method for register section
-  Widget buildRegisterSection(LoginBloc loginController) {
-    return Center(
-      child: FlatButton(
-        child: Text(
-          "Não possui conta? Registre-se.",
-          style: TextStyle(color: Colors.grey[500]),
-        ),
-        onPressed: () {
-          loginController.navigateToRegister();
-        },
-      ),
-    );
+    return StreamBuilder<Object>(
+        stream: loginController.outObscurePassword,
+        builder: (context, snapshot) {
+          return TextFormField(
+            controller: _passwordController,
+            key: _passwordKey,
+            decoration: InputDecoration(
+              border: OutlineInputBorder(),
+              labelText: "Password",
+              suffixIcon: IconButton(
+                icon: Icon(Icons.lock_outline),
+                onPressed: loginController.toggleObscure,
+              ),
+              contentPadding: EdgeInsets.all(15),
+            ),
+            obscureText: snapshot.data != null ? snapshot.data : true,
+            textInputAction: TextInputAction.go,
+            focusNode: this._passwordFocus,
+            onFieldSubmitted: (content) {
+              if (_passwordKey.currentState.validate())
+                validateAndSignIn(loginController);
+              else
+                FocusScope.of(context).requestFocus(this._passwordFocus);
+            },
+            validator: (content) {
+              if (content.isEmpty)
+                return ERROR_EMPTY_PASSWORD;
+              else if (content.length < 6) return ERROR_MIN_PASSWORD;
+            },
+          );
+        });
   }
 
   /// Responsible method for loading widget
   Widget buildLoading() {
-    return Center(
-        child: Container(
-            child: CircularProgressIndicator(), padding: EdgeInsets.all(50.0)));
-  }
-
-  /// Responsible method for creating button tree
-  Column buildButtons(context, loginController) {
-    return Column(
-      children: <Widget>[
-        buildLoginButton(context, loginController),
-        buildErrorStream(loginController),
-        Separator(),
-        SizedBox(height: 15.0),
-        buildSocialButtons(loginController)
-      ],
-    );
-  }
-
-  /// Responsible method for creating
-  Container buildLoginButton(context, loginController) {
     return Container(
-      width: MediaQuery.of(context).size.width,
-      child: RaisedButton(
-        color: Theme.of(context).accentColor,
-        child: Text(
-          "Login",
-          style: TextStyle(color: Colors.white),
-        ),
-        onPressed: () {
-          validateAndSignIn(loginController);
-        },
-      ),
+      child: CircularProgressIndicator(),
+      padding: EdgeInsets.all(5),
     );
   }
 
@@ -204,49 +270,64 @@ class LoginPageState extends State<LoginPage> {
   }
 
   // Build row of Social buttons
-  Widget buildSocialButtons(loginController) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: <Widget>[
-        SocialButton(
-          onPressed: loginController.loginFacebook,
-          logo: Icon(FontAwesomeIcons.facebook),
-          color: Color(0xFF4267b2),
-        ),
-        SocialButton(
-          onPressed: loginController.loginGoogle,
-          logo: Icon(FontAwesomeIcons.google),
-          color: Color(0xFFd52d28),
-        ),
-      ],
-    );
+  Widget buildLoginButtons(LoginBloc loginController) {
+    return StreamBuilder<Object>(
+        stream: loginController.outLoading,
+        initialData: false,
+        builder: (context, snapshot) {
+          if (snapshot.data != null)
+            return AnimatedCrossFade(
+              duration: Duration(milliseconds: 300),
+              crossFadeState: snapshot.data
+                  ? CrossFadeState.showSecond
+                  : CrossFadeState.showFirst,
+              secondChild: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  buildLoading(),
+                ],
+              ),
+              firstChild: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: <Widget>[
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: <Widget>[
+                      SocialButton(
+                        onPressed: loginController.loginGoogle,
+                        logo: Icon(FontAwesomeIcons.google),
+                        color: Color(0xFFd52d28),
+                      ),
+                      SizedBox(width: 10),
+                      SocialButton(
+                        onPressed: loginController.loginFacebook,
+                        logo: Icon(FontAwesomeIcons.facebook),
+                        color: Color(0xFF4267b2),
+                      ),
+                    ],
+                  ),
+                  SocialButton(
+                    onPressed: () {
+                      validateAndSignIn(loginController);
+                    },
+                    logo: Icon(Icons.arrow_forward),
+                    color: Theme.of(context).primaryColor,
+                  )
+                ],
+              ),
+            );
+        });
   }
 
   void validateAndSignIn(LoginBloc loginController) {
+    if (_emailFocus.hasFocus) _emailFocus.unfocus();
+    if (_passwordFocus.hasFocus) _passwordFocus.unfocus();
     if (_formKey.currentState.validate()) {
       SystemChannels.textInput.invokeMethod('TextInput.hide');
       loginController.inEmail.add(_emailController.text.toString().trim());
       loginController.inPassword.add(_passwordController.text);
       loginController.loginEmail();
     }
-  }
-}
-
-class Separator extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: <Widget>[
-        Expanded(
-          child: Container(
-            decoration: BoxDecoration(
-              border: Border(
-                  bottom: BorderSide(width: 2.0, color: Colors.grey[300])),
-            ),
-          ),
-        ),
-      ],
-    );
   }
 }
 

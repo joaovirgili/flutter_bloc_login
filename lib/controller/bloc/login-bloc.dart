@@ -18,18 +18,21 @@ class LoginBloc implements BlocBase {
   // Controllers
   var _emailController = BehaviorSubject<String>();
   var _passwordController = BehaviorSubject<String>();
+  var _obscurePassword = BehaviorSubject<bool>(seedValue: true);
   var _loadingController = BehaviorSubject<bool>(seedValue: false);
   var _errorController = BehaviorSubject<String>();
 
   // Outputs
   Stream<String> get outEmail => _emailController.stream;
   Stream<String> get outPassword => _passwordController.stream;
+  Stream<bool> get outObscurePassword => _obscurePassword.stream;
   Stream<bool> get outLoading => _loadingController.stream;
   Stream<String> get outError => _errorController.stream;
 
   // Inputs
   Sink<String> get inEmail => _emailController.sink;
   Sink<String> get inPassword => _passwordController.sink;
+  Sink<bool> get inObscurePassword => _obscurePassword.sink;
   Sink<bool> get inLoading => _loadingController.sink;
   Sink<String> get inError => _errorController.sink;
 
@@ -46,10 +49,10 @@ class LoginBloc implements BlocBase {
     _loadingController.add(true);
     bool loggedIn = await auth.signInWithEmail(
         _emailController.value, _passwordController.value);
-    _loadingController.add(false);
 
-    if (!loggedIn) {
+    if (loggedIn == null || !loggedIn) {
       inError.add(ERROR_VALIDATION);
+      _loadingController.add(false);
     } else {
       navigateToHome();
     }
@@ -73,6 +76,10 @@ class LoginBloc implements BlocBase {
     await this.auth.signout();
   }
 
+  toggleObscure() {
+    inObscurePassword.add(!_obscurePassword.value);
+  }
+
   navigateToHome() {
     Navigator.of(this.context)
         .pushNamedAndRemoveUntil(PATH_HOME, (Route<dynamic> route) => false);
@@ -82,11 +89,18 @@ class LoginBloc implements BlocBase {
     Navigator.of(this.context).pushNamed(PATH_REGISTER);
   }
 
+  checkAndCleanError() {
+    if (_errorController.value != "") {
+      inError.add("");
+    }
+  }
+
   @override
   void dispose() {
     _emailController.close();
     _passwordController.close();
     _loadingController.close();
     _errorController.close();
+    _obscurePassword.close();
   }
 }

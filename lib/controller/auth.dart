@@ -47,9 +47,11 @@ class Authenticator {
           .signInWithEmailAndPassword(email: email, password: password);
       User loginUser = User.fromEmail(firebaseUser);
       User databaseUser = await userExists(loginUser.email);
+      if (databaseUser == null) return null;
       SharedPreferencesHelper.setCurrentUserPrefs(databaseUser.uid);
       return true;
     } catch (e) {
+      print(e);
       return false;
     }
   }

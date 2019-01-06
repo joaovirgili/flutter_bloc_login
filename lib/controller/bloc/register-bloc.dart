@@ -7,7 +7,5 @@ class RegisterBloc implements BlocBase {
   RegisterBloc(this.context);
 
   @override
-  void dispose() {
-    // TODO: implement dispose
-  }
+  void dispose() {}
 }

@@ -18,7 +18,12 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(primarySwatch: Colors.blue),
+      theme: ThemeData(
+        fontFamily: 'Roboto',
+        primaryColor: Color(0xFF6DA2FF),
+        backgroundColor: Color(0xFFEFF3FF),
+        hintColor: Color(0xFF6DA2FF),
+      ),
       home: Builder(
         builder: (BuildContext context) {
           return BlocProvider(
