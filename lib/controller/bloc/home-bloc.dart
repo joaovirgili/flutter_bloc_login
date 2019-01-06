@@ -17,13 +17,13 @@ class HomeBloc implements BlocBase {
   final Authenticator auth = Authenticator();
 
   // Controllers
-  var _nameController = BehaviorSubject<String>();
+  var _userController = BehaviorSubject<User>();
 
   // Outputs
-  Stream<String> get outName => _nameController.stream;
+  Stream<User> get outUser => _userController.stream;
 
   // Inputs
-  Sink<String> get inName => _nameController.sink;
+  Sink<User> get inUser => _userController.sink;
 
   signout() async {
     await this.auth.signout();
@@ -38,8 +38,7 @@ class HomeBloc implements BlocBase {
   getCurrentUser() async {
     User user = await auth.getCurrentUser();
     if (user != null) {
-      String display = user.displayName != null ? user.displayName : user.email;
-      this.inName.add(display);
+      this.inUser.add(user);
     } else {
       this.navigateToLogin();
     }
@@ -47,6 +46,6 @@ class HomeBloc implements BlocBase {
 
   @override
   void dispose() {
-    _nameController.close();
+    _userController.close();
   }
 }

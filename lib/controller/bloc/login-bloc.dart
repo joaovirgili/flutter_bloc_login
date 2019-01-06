@@ -78,6 +78,10 @@ class LoginBloc implements BlocBase {
         .pushNamedAndRemoveUntil(PATH_HOME, (Route<dynamic> route) => false);
   }
 
+  navigateToRegister() {
+    Navigator.of(this.context).pushNamed(PATH_REGISTER);
+  }
+
   @override
   void dispose() {
     _emailController.close();

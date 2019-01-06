@@ -1,6 +1,7 @@
 // Routes
 const PATH_HOME = '/home';
 const PATH_LOGIN = '/login';
+const PATH_REGISTER = '/register';
 
 // Login
 const ERROR_EMAIL = 'Insira um e-mail válido';

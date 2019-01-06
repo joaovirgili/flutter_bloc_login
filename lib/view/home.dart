@@ -1,3 +1,5 @@
+import 'package:bloc_login/model/user.dart';
+
 import '../controller/bloc/home-bloc.dart';
 
 import 'package:bloc_pattern/bloc_pattern.dart';
@@ -7,65 +9,44 @@ class Home extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final HomeBloc homeController = BlocProvider.of<HomeBloc>(context);
+    homeController.getCurrentUser();
     return Scaffold(
       appBar: AppBar(
-        title: Text('Dashboard'),
+        title: Text('Login Bloc'),
         backgroundColor: Theme.of(context).accentColor,
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+      body: Center(child: Text('Bem-vindo.')),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
           children: <Widget>[
-            new UsernameText(homeController: homeController),
-            SizedBox(
-              height: 20.0,
-            ),
-            RaisedButton(
-              child: Text("Logout"),
-              onPressed: () async {
+            StreamBuilder<User>(
+                stream: homeController.outUser,
+                builder: (BuildContext context, AsyncSnapshot<User> snapshot) {
+                  return snapshot.data != null
+                      ? UserAccountsDrawerHeader(
+                          otherAccountsPictures: <Widget>[
+                            CircleAvatar(
+                              backgroundImage: snapshot.data.photoUrl != ""
+                                  ? NetworkImage(snapshot.data.photoUrl)
+                                  : AssetImage('assets/img/default-user.png'),
+                            )
+                          ],
+                          accountName: Text(snapshot.data.displayName),
+                          accountEmail: Text(snapshot.data.email),
+                        )
+                      : Container();
+                }),
+            ListTile(
+              leading: Icon(Icons.arrow_back),
+              title: Text("Logout"),
+              onTap: () async {
                 await homeController.signout();
               },
             ),
           ],
         ),
       ),
-    );
-  }
-}
-
-class UsernameText extends StatefulWidget {
-  const UsernameText({
-    Key key,
-    @required this.homeController,
-  }) : super(key: key);
-
-  final HomeBloc homeController;
-
-  @override
-  UsernameTextState createState() {
-    homeController.getCurrentUser();
-    return new UsernameTextState();
-  }
-}
-
-class UsernameTextState extends State<UsernameText> {
-  @override
-  Widget build(BuildContext context) {
-    return StreamBuilder(
-      stream: widget.homeController.outName,
-      initialData: "",
-      builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
-        return AnimatedCrossFade(
-          duration: Duration(milliseconds: 300),
-          crossFadeState: snapshot.data == ""
-              ? CrossFadeState.showSecond
-              : CrossFadeState.showFirst,
-          firstChild: Text('${snapshot.data}'),
-          secondChild: Center(
-            child: CircularProgressIndicator(),
-          ),
-        );
-      },
     );
   }
 }

@@ -5,6 +5,8 @@ import 'package:firebase_database/firebase_database.dart';
 
 import './../constants.dart';
 
+enum LoginMethod { Google, Facebook, Email }
+
 class Database {
   static Future<String> createUser(User user) async {
     Map<String, dynamic> object = {
@@ -13,6 +15,8 @@ class Database {
       "phone_number": user.phoneNumber,
       "google_uid": user.googleUid,
       "facebook_uid": user.facebookUid,
+      "photo_url": user.photoUrl,
+      "auth_id": user.authUid,
     };
 
     DatabaseReference _databaseReference =
@@ -51,5 +55,12 @@ class Database {
       });
     });
     return users;
+  }
+
+  static Future<void> updateUserInfo(
+      Map<String, dynamic> userInfo, String uid) async {
+    DatabaseReference _databaseReference =
+        FirebaseDatabase.instance.reference();
+    await _databaseReference.child(DATABASE_USERS + uid).update(userInfo);
   }
 }

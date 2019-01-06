@@ -12,8 +12,6 @@ import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:http/http.dart' as http;
 import 'dart:async';
 
-enum loginMethod { Google, Facebook, Email }
-
 class Authenticator {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignInAccount = GoogleSignIn();
@@ -31,14 +29,14 @@ class Authenticator {
   }
 
   // Check if user already exists
-  Future<dynamic> userExists(String email) async {
+  Future<User> userExists(String email) async {
     List<User> users = await Database.getAllUsers();
     for (var i = 0; i < users.length; i++) {
       if (users[i].email == email) {
-        return users[i].uid;
+        return users[i];
       }
     }
-    return false;
+    return null;
   }
 
   // E-mail login
@@ -47,9 +45,9 @@ class Authenticator {
       FirebaseUser firebaseUser = await this
           ._firebaseAuth
           .signInWithEmailAndPassword(email: email, password: password);
-      User user = User.fromEmail(firebaseUser);
-      var uid = await userExists(user.email);
-      SharedPreferencesHelper.setCurrentUserPrefs(uid);
+      User loginUser = User.fromEmail(firebaseUser);
+      User databaseUser = await userExists(loginUser.email);
+      SharedPreferencesHelper.setCurrentUserPrefs(databaseUser.uid);
       return true;
     } catch (e) {
       return false;
@@ -60,14 +58,10 @@ class Authenticator {
   Future<bool> signInWithFacebook() async {
     final FacebookLoginResult result =
         await this._facebookSignIn.logInWithReadPermissions(['email']);
-    User user = await this._getFacebookUser(result.accessToken);
+    User loginUser = await this._getFacebookUser(result.accessToken);
 
     if (result.status == FacebookLoginStatus.loggedIn) {
-      var uid = await userExists(user.email);
-      if (uid == false) {
-        uid = await Database.createUser(user);
-      }
-      SharedPreferencesHelper.setCurrentUserPrefs(uid);
+      await this._checkDatabase(loginUser, LoginMethod.Facebook);
       return true;
     } else if (result.status == FacebookLoginStatus.cancelledByUser) {
       print("Login facebook: cancelado");
@@ -82,13 +76,8 @@ class Authenticator {
   Future<bool> signInWithGoogle() async {
     try {
       GoogleSignInAccount googleSigniIn = await _googleSignInAccount.signIn();
-      User user = User.fromGoogle(googleSigniIn);
-
-      var uid = await userExists(user.email);
-      if (uid == false) {
-        uid = await Database.createUser(user);
-      }
-      SharedPreferencesHelper.setCurrentUserPrefs(uid);
+      User loginUser = User.fromGoogle(googleSigniIn);
+      await this._checkDatabase(loginUser, LoginMethod.Google);
       return true;
     } catch (error) {
       print('Erro login Google: $error');
@@ -112,15 +101,75 @@ class Authenticator {
   }
 
   // Get facebook user info
-  _getFacebookUser(FacebookAccessToken token) async {
-    if (token != null) {
+  _getFacebookUser(FacebookAccessToken accessToken) async {
+    if (accessToken != null) {
       var graphResponse = await http.get(
-          'https://graph.facebook.com/v2.12/me?fields=name,first_name,last_name,email&access_token=${token.token}');
+          'https://graph.facebook.com/v2.12/me?fields=name,first_name,last_name,email,picture.height(200)&access_token=${accessToken.token}');
       if (graphResponse.statusCode == 200) {
         var body = json.decode(graphResponse.body);
         return new User.fromFacebook(body);
       }
     }
     return null;
+  }
+
+  // Check if account is already associated with the login method used
+  bool checkAssociate(LoginMethod method, User user) {
+    switch (method) {
+      case LoginMethod.Email:
+        return user.password != "";
+        break;
+      case LoginMethod.Facebook:
+        return user.facebookUid != "";
+        break;
+      case LoginMethod.Google:
+        return user.googleUid != "";
+        break;
+    }
+    return false;
+  }
+
+  /// Check if user logged exists in database and create if does not
+  /// Set shared prefs to sabe user logged in.
+  _checkDatabase(User loginUser, LoginMethod method) async {
+    User databaseUser = await userExists(loginUser.email);
+    String uid;
+    if (databaseUser != null) {
+      uid = databaseUser.uid;
+      await this._updateInfoOnLogin(method, loginUser, databaseUser);
+    } else {
+      uid = await Database.createUser(loginUser);
+    }
+    SharedPreferencesHelper.setCurrentUserPrefs(uid);
+  }
+
+  /// @param User databaseUser: user instance from database
+  /// @param User loginUser: user instance from login
+  /// @param LoginMetho method: method used for logging in
+  ///
+  /// Update user's info if hasn't already associated account by this method
+  /// Compares which information must be filled in database
+  Future<void> _updateInfoOnLogin(
+      LoginMethod method, User loginUser, User databaseUser) async {
+    if (!checkAssociate(method, databaseUser)) {
+      Map<String, dynamic> info = {};
+
+      if (databaseUser.displayName == "" && loginUser.displayName != "")
+        info['display_name'] = loginUser.displayName;
+      if (databaseUser.phoneNumber == "" && loginUser.phoneNumber != "")
+        info['phone_number'] = loginUser.phoneNumber;
+      if (databaseUser.authUid == "" && loginUser.authUid != "")
+        info['auth_id'] = loginUser.authUid;
+      if (databaseUser.googleUid == "" && loginUser.googleUid != "")
+        info['google_uid'] = loginUser.googleUid;
+      if (databaseUser.facebookUid == "" && loginUser.facebookUid != "")
+        info['facebook_uid'] = loginUser.facebookUid;
+      if (databaseUser.photoUrl == "" && loginUser.photoUrl != "")
+        info['photo_url'] = loginUser.photoUrl;
+
+      print(info.toString());
+
+      await Database.updateUserInfo(info, databaseUser.uid);
+    }
   }
 }

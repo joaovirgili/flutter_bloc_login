@@ -9,6 +9,8 @@ class User {
   String _authUid;
   String _googleUid;
   String _facebookUid;
+  String _photoUrl;
+  String _password;
 
   User.fromEmail(FirebaseUser user) {
     if (user != null) {
@@ -19,6 +21,8 @@ class User {
       this._authUid = user.uid;
       this._facebookUid = "";
       this._googleUid = "";
+      this._photoUrl = "";
+      this._password = "";
     }
   }
 
@@ -30,6 +34,8 @@ class User {
     this._authUid = data['google_uid'] ?? "";
     this._googleUid = data['google_uid'] ?? "";
     this._facebookUid = data['facebook_uid'] ?? "";
+    this._photoUrl = data['photo_url'] ?? "";
+    this._password = data['password'] ?? "";
   }
 
   User.fromFacebook(profile) {
@@ -40,6 +46,8 @@ class User {
     this._authUid = "";
     this._googleUid = "";
     this._facebookUid = profile['id'];
+    this._photoUrl = profile['picture']['data']['url'];
+    this._password = "";
   }
 
   User.fromGoogle(GoogleSignInAccount googleUser) {
@@ -50,6 +58,8 @@ class User {
     this._authUid = "";
     this._googleUid = googleUser.id;
     this._facebookUid = "";
+    this._photoUrl = googleUser.photoUrl;
+    this._password = "";
   }
 
   get displayName => this._displayName;
@@ -59,4 +69,8 @@ class User {
   get authUid => this._authUid;
   get googleUid => this._googleUid;
   get facebookUid => this._facebookUid;
+  get photoUrl => this._photoUrl;
+  get password => this._password;
+
+  setUserId(String uid) => this._uid = uid;
 }
