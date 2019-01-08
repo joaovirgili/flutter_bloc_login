@@ -22,6 +22,8 @@ class LoginPageState extends State<LoginPage> {
   final _emailKey = GlobalKey<FormFieldState>();
   final _passwordKey = GlobalKey<FormFieldState>();
 
+  double _height = 320;
+
   void initState() {
     super.initState();
 
@@ -78,7 +80,7 @@ class LoginPageState extends State<LoginPage> {
                     buildLogosSection(),
                     SizedBox(height: 40.0),
                     Container(
-                      height: 320,
+                      height: this._height,
                       width: 290,
                       child: Stack(
                         children: <Widget>[
@@ -137,7 +139,7 @@ class LoginPageState extends State<LoginPage> {
       BuildContext context, LoginBloc loginController) {
     return Container(
       width: 280,
-      height: (320 - (75 / 2) - 25),
+      height: (this._height - (75 / 2) - 25),
       margin: EdgeInsets.only(left: 5),
       decoration: BoxDecoration(
           boxShadow: [new BoxShadow(color: Color(0xFFB5B5B5), blurRadius: 5.0)],
@@ -145,6 +147,7 @@ class LoginPageState extends State<LoginPage> {
           borderRadius: BorderRadius.all(Radius.circular(25.0))),
       padding: EdgeInsets.only(top: 50.0, left: 20.0, right: 20.0),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           buildEmailFormField(context),
           SizedBox(height: 20.0),
@@ -159,7 +162,7 @@ class LoginPageState extends State<LoginPage> {
               )
             ],
           ),
-          buildErrorStream(loginController)
+          buildErrorStream(loginController),
         ],
       ),
     );
@@ -168,14 +171,20 @@ class LoginPageState extends State<LoginPage> {
   FlatButton buildRegiserButton(BuildContext context) {
     return FlatButton(
       onPressed: () => {},
-      child: Text("Registre-se",
-          style: TextStyle(color: Theme.of(context).primaryColor)),
+      child: Text(
+        "Registre-se",
+        style: TextStyle(color: Theme.of(context).primaryColor),
+      ),
     );
   }
 
   /// Responsible method for creating logos' section
   Widget buildLogosSection() {
-    return Image.asset('assets/img/logo-bird.png', width: 100.0, height: 100.0);
+    return Hero(
+      tag: 'logo',
+      child:
+          Image.asset('assets/img/logo-bird.png', width: 100.0, height: 100.0),
+    );
   }
 
   /// Responsible method for e-mail input
@@ -251,7 +260,7 @@ class LoginPageState extends State<LoginPage> {
       builder: (BuildContext context, AsyncSnapshot snapshot) {
         if (snapshot.hasData)
           return Row(
-            mainAxisAlignment: MainAxisAlignment.end,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Container(
                 padding: EdgeInsets.all(2.0),
@@ -263,13 +272,12 @@ class LoginPageState extends State<LoginPage> {
           );
         else
           return SizedBox(
-            height: 15.0,
+            height: 10.0,
           );
       },
     );
   }
 
-  // Build row of Social buttons
   Widget buildLoginButtons(LoginBloc loginController) {
     return StreamBuilder<Object>(
         stream: loginController.outLoading,

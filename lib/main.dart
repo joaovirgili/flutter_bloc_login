@@ -1,5 +1,6 @@
 import 'package:bloc_login/controller/bloc/register-bloc.dart';
 import 'package:bloc_login/view/register.dart';
+import 'package:bloc_login/view/splash.dart';
 
 import './controller/bloc/home-bloc.dart';
 import './controller/bloc/login-bloc.dart';
@@ -26,9 +27,9 @@ class MyApp extends StatelessWidget {
       ),
       home: Builder(
         builder: (BuildContext context) {
-          return BlocProvider(
-            child: LoginPage(),
-            bloc: LoginBloc(context),
+          return new MySplash(
+            navigateAfterSeconds:
+                BlocProvider(child: LoginPage(), bloc: LoginBloc(context)),
           );
         },
       ),
